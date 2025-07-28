@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import styles from './ChatMessage.module.css';
 
 interface ChatMessageProps {
     message: string;
@@ -52,7 +55,27 @@ export default function ChatMessage({ message, isUser, isTyping, onStream }: Cha
                         </div>
                     </div>
                 ) : (
-                    <p className="whitespace-pre-wrap">{displayedText}</p>
+                    <div className={styles['markdown-content']}>
+                        <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                                img: ({node, src, alt, ...props}) => (
+                                    <img 
+                                        src={src} 
+                                        alt={alt} 
+                                        className="max-w-full h-auto rounded-lg my-2"
+                                        loading="lazy"
+                                        {...props}
+                                    />
+                                ),
+                                p: ({children}) => (
+                                    <p className="whitespace-pre-wrap mb-2">{children}</p>
+                                )
+                            }}
+                        >
+                            {displayedText}
+                        </ReactMarkdown>
+                    </div>
                 )}
             </div>
         </div>
