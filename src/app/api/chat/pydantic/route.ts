@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     // Validate message history structure
     if (Array.isArray(aiMessageHistory)) {
-        console.log('AI message history:', JSON.stringify(aiMessageHistory, null, 2));
+        //console.log('AI message history:', JSON.stringify(aiMessageHistory, null, 2));
     } else {
         console.warn('Received invalid message history format');
     }

@@ -21,6 +21,9 @@ export default function Home() {
     const userMessage: Message = { content: message, isUser: true };
     setMessages(prevMessages => [...prevMessages, userMessage]);
     setIsLoading(true);
+    
+    // Immediate scroll after adding user message
+    setTimeout(() => handleStream(), 0);
 
     try {
       const response = await fetch('/api/chat/pydantic', {
@@ -66,16 +69,33 @@ export default function Home() {
     }
   };
 
+  const handleStream = () => {
+    const chatContainer = document.querySelector('.chat-container');
+    if (chatContainer) {
+      // Use smooth scrolling for a better user experience
+      chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  // Effect to handle scrolling when messages change
+  useEffect(() => {
+    handleStream();
+  }, [messages.length]);
+
   return (
     <main className="container mx-auto max-w-4xl p-4">
       <div className="space-y-4">
-        <div className="h-[600px] overflow-y-auto p-4 bg-white rounded-lg shadow">
+        <div className="chat-container h-[600px] overflow-y-auto p-4 bg-white rounded-lg shadow">
           {messages.map((msg, index) => (
             <ChatMessage
               key={index}
               message={msg.content}
               isUser={msg.isUser}
               isTyping={false}
+              onStream={handleStream}
             />
           ))}
           {isLoading && (
@@ -83,6 +103,7 @@ export default function Home() {
               message=""
               isUser={false}
               isTyping={true}
+              onStream={handleStream}
             />
           )}
         </div>

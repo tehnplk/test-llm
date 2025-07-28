@@ -4,26 +4,36 @@ interface ChatMessageProps {
     message: string;
     isUser: boolean;
     isTyping: boolean;
+    onStream?: () => void;
 }
 
-export default function ChatMessage({ message, isUser, isTyping }: ChatMessageProps) {
+export default function ChatMessage({ message, isUser, isTyping, onStream }: ChatMessageProps) {
     const [displayedText, setDisplayedText] = useState<string>('');
     const [currentIndex, setCurrentIndex] = useState<number>(0);
+    const [isStreaming, setIsStreaming] = useState<boolean>(false);
 
     useEffect(() => {
         if (!isUser && !isTyping && message) {
+            setIsStreaming(true);
             const timer = setTimeout(() => {
                 if (currentIndex < message.length) {
                     setDisplayedText(message.slice(0, currentIndex + 1));
                     setCurrentIndex(currentIndex + 1);
+                    onStream?.();
+                } else {
+                    setIsStreaming(false);
                 }
             }, 20);
 
-            return () => clearTimeout(timer);
+            return () => {
+                clearTimeout(timer);
+                setIsStreaming(false);
+            };
         } else if (isUser) {
             setDisplayedText(message);
+            setIsStreaming(false);
         }
-    }, [currentIndex, message, isUser, isTyping]);
+    }, [currentIndex, message, isUser, isTyping, onStream]);
 
     return (
         <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
