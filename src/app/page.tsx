@@ -86,9 +86,9 @@ export default function Home() {
   }, [messages.length]);
 
   return (
-    <main className="container mx-auto max-w-4xl p-4">
+    <main className="container mx-auto max-w-6xl p-4">
       <div className="space-y-4">
-        <div className="chat-container h-[600px] overflow-y-auto p-4 bg-white rounded-lg shadow">
+        <div className="chat-container h-[700px] overflow-y-auto p-6 bg-white rounded-lg shadow">
           {messages.map((msg, index) => (
             <ChatMessage
               key={index}
