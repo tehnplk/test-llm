@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
+import { MessageHistory } from '@/app/types/messageHistory';
 
-
-var message_history: string[] = [];
+interface ChatResponse {
+    message: string;
+    message_history: MessageHistory;
+}
 
 export async function POST(request: Request) {
 
-    const { message } = await request.json();
+    const { message ,message_history} = await request.json();
     const api = 'http://localhost:8000/chat';
     const response = await fetch(api, {
         method: 'POST',
@@ -19,13 +22,26 @@ export async function POST(request: Request) {
     });
 
     const data = await response.json();
-
+    
+    if (!response.ok) {
+        throw new Error('Failed to get response from chat server');
+    }
 
     const aiMessage = data['message'];
-    message_history = data['message_history'];
-    console.log('AI message history:', message_history);
-    console.log('AI message:', aiMessage);
+    const aiMessageHistory = data['message_history'] as MessageHistory;
 
-    return NextResponse.json({ message: aiMessage });
+    // Validate message history structure
+    if (Array.isArray(aiMessageHistory)) {
+        console.log('AI message history:', JSON.stringify(aiMessageHistory, null, 2));
+    } else {
+        console.warn('Received invalid message history format');
+    }
+
+    const responseData: ChatResponse = {
+        message: aiMessage,
+        message_history: aiMessageHistory
+    };
+
+    return NextResponse.json(responseData);
 
 }

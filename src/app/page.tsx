@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ChatInput from './components/ChatInput';
 import ChatMessage from './components/ChatMessage';
+import { MessageHistory } from './types/messageHistory';
+import { saveMessageHistory, getMessageHistory } from './utils/sessionStorage';
 
 interface Message {
   content: string;
@@ -12,6 +14,7 @@ interface Message {
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [messageHistory, setMessageHistory] = useState<MessageHistory>(getMessageHistory());
 
   const handleSendMessage = async (message: string) => {
     // Add user message
@@ -27,6 +30,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           message,
+          message_history: messageHistory,
           messages: messages.map(msg => ({
             role: msg.isUser ? 'user' : 'assistant',
             content: msg.content
@@ -35,13 +39,20 @@ export default function Home() {
       });
 
       const data = await response.json();
-      console.log(data);
+      console.log('API Response:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to get response from server');
       }
+
       const aiMessage: Message = { content: data.message, isUser: false };
       setMessages(prevMessages => [...prevMessages, aiMessage]);
+
+      // Save message history from API response
+      if (data.message_history) {
+        setMessageHistory(data.message_history);
+        saveMessageHistory(data.message_history);
+      }
     } catch (error) {
       console.error('Error:', error);
       // Add error message to chat
